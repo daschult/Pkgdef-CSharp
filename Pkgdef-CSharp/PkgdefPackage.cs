@@ -24,15 +24,13 @@ namespace Pkgdef_CSharp
     /// </para>
     /// </remarks>
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
-    [Guid(Pkgdef_CSharpPackage.PackageGuidString)]
-    public sealed class Pkgdef_CSharpPackage : AsyncPackage
+    [Guid(PkgdefPackage.PackageGuidString)]
+    public sealed class PkgdefPackage : AsyncPackage
     {
         /// <summary>
         /// Pkgdef_CSharpPackage GUID string.
         /// </summary>
         public const string PackageGuidString = "d5aff323-3cc3-44e8-847a-88ef83fb0df7";
-
-        #region Package Members
 
         /// <summary>
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
@@ -47,7 +45,5 @@ namespace Pkgdef_CSharp
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
         }
-
-        #endregion
     }
 }
