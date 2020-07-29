@@ -22,14 +22,14 @@ namespace Pkgdef_CSharp_Tests
             IEnumerator<char> enumerator = characters.GetEnumerator();
             Iterator<char> iterator = Iterator.Create(enumerator);
             Assert.IsNotNull(iterator);
-            Assert.IsFalse(iterator.HasStarted);
-            Assert.IsFalse(iterator.HasCurrent);
+            Assert.IsFalse(iterator.HasStarted());
+            Assert.IsFalse(iterator.HasCurrent());
 
             foreach (char character in characters)
             {
                 Assert.IsTrue(iterator.Next());
-                Assert.IsTrue(iterator.HasStarted);
-                Assert.IsTrue(iterator.HasCurrent);
+                Assert.IsTrue(iterator.HasStarted());
+                Assert.IsTrue(iterator.HasCurrent());
                 Assert.AreEqual(character, iterator.Current);
                 Assert.AreEqual(character, enumerator.Current);
             }
@@ -37,8 +37,8 @@ namespace Pkgdef_CSharp_Tests
             for (int i = 0; i < 2; ++i)
             {
                 Assert.IsFalse(iterator.Next());
-                Assert.IsTrue(iterator.HasStarted);
-                Assert.IsFalse(iterator.HasCurrent);
+                Assert.IsTrue(iterator.HasStarted());
+                Assert.IsFalse(iterator.HasCurrent());
                 Assert.ThrowsException<PreConditionException>(() => iterator.Current);
                 Assert.ThrowsException<InvalidOperationException>(() => enumerator.Current);
             }
@@ -53,16 +53,16 @@ namespace Pkgdef_CSharp_Tests
 
             Iterator<char> iterator = Iterator.Create(enumerator);
             Assert.IsNotNull(iterator);
-            Assert.IsTrue(iterator.HasStarted);
-            Assert.IsTrue(iterator.HasCurrent);
+            Assert.IsTrue(iterator.HasStarted());
+            Assert.IsTrue(iterator.HasCurrent());
             Assert.AreEqual('h', iterator.Current);
             Assert.AreEqual('h', enumerator.Current);
 
             foreach (char character in characters.Skip(1))
             {
                 Assert.IsTrue(iterator.Next());
-                Assert.IsTrue(iterator.HasStarted);
-                Assert.IsTrue(iterator.HasCurrent);
+                Assert.IsTrue(iterator.HasStarted());
+                Assert.IsTrue(iterator.HasCurrent());
                 Assert.AreEqual(character, iterator.Current);
                 Assert.AreEqual(character, enumerator.Current);
             }
@@ -70,8 +70,8 @@ namespace Pkgdef_CSharp_Tests
             for (int i = 0; i < 2; ++i)
             {
                 Assert.IsFalse(iterator.Next());
-                Assert.IsTrue(iterator.HasStarted);
-                Assert.IsFalse(iterator.HasCurrent);
+                Assert.IsTrue(iterator.HasStarted());
+                Assert.IsFalse(iterator.HasCurrent());
                 Assert.ThrowsException<PreConditionException>(() => iterator.Current);
                 Assert.ThrowsException<InvalidOperationException>(() => enumerator.Current);
             }
@@ -86,16 +86,16 @@ namespace Pkgdef_CSharp_Tests
 
             Iterator<char> iterator = Iterator.Create(enumerator);
             Assert.IsNotNull(iterator);
-            Assert.IsTrue(iterator.HasStarted);
-            Assert.IsFalse(iterator.HasCurrent);
+            Assert.IsTrue(iterator.HasStarted());
+            Assert.IsFalse(iterator.HasCurrent());
             Assert.ThrowsException<PreConditionException>(() => iterator.Current);
             Assert.ThrowsException<InvalidOperationException>(() => enumerator.Current);
 
             for (int i = 0; i < 2; ++i)
             {
                 Assert.IsFalse(iterator.Next());
-                Assert.IsTrue(iterator.HasStarted);
-                Assert.IsFalse(iterator.HasCurrent);
+                Assert.IsTrue(iterator.HasStarted());
+                Assert.IsFalse(iterator.HasCurrent());
                 Assert.ThrowsException<PreConditionException>(() => iterator.Current);
                 Assert.ThrowsException<InvalidOperationException>(() => enumerator.Current);
             }
@@ -111,14 +111,14 @@ namespace Pkgdef_CSharp_Tests
         public void Create_WithEmptyIEnumerable()
         {
             Iterator<char> iterator = Iterator.Create("");
-            Assert.IsFalse(iterator.HasStarted);
-            Assert.IsFalse(iterator.HasCurrent);
+            Assert.IsFalse(iterator.HasStarted());
+            Assert.IsFalse(iterator.HasCurrent());
 
             for (int i = 0; i < 2; ++i)
             {
                 Assert.IsFalse(iterator.Next());
-                Assert.IsTrue(iterator.HasStarted);
-                Assert.IsFalse(iterator.HasCurrent);
+                Assert.IsTrue(iterator.HasStarted());
+                Assert.IsFalse(iterator.HasCurrent());
             }
         }
 
@@ -128,22 +128,22 @@ namespace Pkgdef_CSharp_Tests
             string characters = "hello";
             Iterator<char> iterator = Iterator.Create(characters);
             Assert.IsNotNull(iterator);
-            Assert.IsFalse(iterator.HasStarted);
-            Assert.IsFalse(iterator.HasCurrent);
+            Assert.IsFalse(iterator.HasStarted());
+            Assert.IsFalse(iterator.HasCurrent());
 
             foreach (char character in characters)
             {
                 Assert.IsTrue(iterator.Next());
-                Assert.IsTrue(iterator.HasStarted);
-                Assert.IsTrue(iterator.HasCurrent);
+                Assert.IsTrue(iterator.HasStarted());
+                Assert.IsTrue(iterator.HasCurrent());
                 Assert.AreEqual(character, iterator.Current);
             }
 
             for (int i = 0; i < 2; ++i)
             {
                 Assert.IsFalse(iterator.Next());
-                Assert.IsTrue(iterator.HasStarted);
-                Assert.IsFalse(iterator.HasCurrent);
+                Assert.IsTrue(iterator.HasStarted());
+                Assert.IsFalse(iterator.HasCurrent());
                 Assert.ThrowsException<PreConditionException>(() => iterator.Current);
             }
         }

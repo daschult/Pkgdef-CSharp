@@ -45,10 +45,17 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="EnumeratorIterator.cs" />
     <Compile Include="Iterator.cs" />
-    <Compile Include="ParseIssue.cs" />
+    <Compile Include="IteratorBase.cs" />
+    <Compile Include="PkgdefIssue.cs" />
     <Compile Include="PkgdefClassifier.cs" />
     <Compile Include="PkgdefDocument.cs" />
+    <Compile Include="PkgdefSegment.cs" />
+    <Compile Include="PkgdefSegmentType.cs" />
+    <Compile Include="PkgdefToken.cs" />
+    <Compile Include="PkgdefTokenizer.cs" />
+    <Compile Include="PkgdefTokenType.cs" />
     <Compile Include="PreCondition.cs" />
     <Compile Include="PreConditionException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
