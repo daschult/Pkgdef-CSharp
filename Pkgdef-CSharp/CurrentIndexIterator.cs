@@ -14,7 +14,17 @@ namespace Pkgdef_CSharp
         /// <returns>A new CurrentIndexIterator that will iterate over the values in the provided IEnumerable.</returns>
         public static CurrentIndexIterator<T> Create<T>(Iterator<T> iterator)
         {
-            return new CurrentIndexIterator<T>(iterator);
+            return CurrentIndexIterator.Create(0, iterator);
+        }
+
+        /// <summary>
+        /// Create a new CurrentIndexIterator that will iterate over the values in the provided IEnumerable.
+        /// </summary>
+        /// <param name="iterator">The Iterator to iterate over.</param>
+        /// <returns>A new CurrentIndexIterator that will iterate over the values in the provided IEnumerable.</returns>
+        public static CurrentIndexIterator<T> Create<T>(int startIndex, Iterator<T> iterator)
+        {
+            return new CurrentIndexIterator<T>(startIndex, iterator);
         }
 
         /// <summary>
@@ -48,12 +58,13 @@ namespace Pkgdef_CSharp
         private readonly Iterator<T> iterator;
         private int currentIndex;
 
-        internal CurrentIndexIterator(Iterator<T> iterator)
+        internal CurrentIndexIterator(int startIndex, Iterator<T> iterator)
         {
+            PreCondition.AssertGreaterThanOrEqualTo(startIndex, 0, nameof(startIndex));
             PreCondition.AssertNotNull(iterator, nameof(iterator));
 
             this.iterator = iterator;
-            this.currentIndex = 0;
+            this.currentIndex = startIndex;
         }
 
         /// <inheritdoc/>

@@ -10,6 +10,15 @@ namespace Pkgdef_CSharp
     /// </summary>
     internal class PkgdefDocument
     {
+        internal static void ThrowParseException(PkgdefIssue issue)
+        {
+            throw new ParseException(issue.GetMessage());
+        }
+
+        internal static void IgnoreIssue(PkgdefIssue issue)
+        {
+        }
+
         private readonly IReadOnlyList<PkgdefSegment> segments;
         private readonly IReadOnlyList<PkgdefIssue> issues;
 
@@ -107,6 +116,10 @@ namespace Pkgdef_CSharp
                     result = PkgdefDocument.ParseLineComment(tokenizer, onIssue);
                     break;
 
+                case PkgdefTokenType.LeftSquareBracket:
+                    result = PkgdefDocument.ParseRegistryKeyPath(tokenizer, onIssue);
+                    break;
+
                 default:
                     result = PkgdefSegment.Unrecognized(tokenizer.GetCurrent().GetStartIndex(), tokenizer.GetCurrent().GetText());
                     tokenizer.Next();
@@ -153,14 +166,50 @@ namespace Pkgdef_CSharp
             return result;
         }
 
-        private static PkgdefSegment ParseRegistryKeyPath(PkgdefTokenizer tokenizer, Action<PkgdefIssue> onIssue)
+        internal static PkgdefRegistryKeyPathSegment ParseRegistryKeyPath(int startIndex, string text)
+        {
+            PreCondition.AssertGreaterThanOrEqualTo(startIndex, 0, nameof(startIndex));
+            PreCondition.AssertNotNullAndNotEmpty(text, nameof(text));
+            PreCondition.AssertEqual(text[0], '[', "text[0]");
+
+            Action<PkgdefIssue> onIssue = PkgdefDocument.IgnoreIssue;
+            PkgdefTokenizer tokenizer = PkgdefTokenizer.Create(startIndex, text, onIssue);
+            tokenizer.Next();
+            return PkgdefDocument.ParseRegistryKeyPath(tokenizer, onIssue);
+        }
+
+        internal static PkgdefRegistryKeyPathSegment ParseRegistryKeyPath(PkgdefTokenizer tokenizer, Action<PkgdefIssue> onIssue)
         {
             PreCondition.AssertNotNull(tokenizer, nameof(tokenizer));
             PreCondition.AssertTrue(tokenizer.HasCurrent(), "tokenizer.HasCurrent()");
             PreCondition.AssertEqual(tokenizer.GetCurrent().GetTokenType(), PkgdefTokenType.LeftSquareBracket, "tokenizer.GetCurrent().GetTokenType()");
             PreCondition.AssertNotNull(onIssue, nameof(onIssue));
 
-            return null;
+            List<PkgdefToken> tokens = new List<PkgdefToken>() { tokenizer.TakeCurrent() };
+            while (tokenizer.HasCurrent())
+            {
+                PkgdefTokenType tokenType = tokenizer.GetCurrent().GetTokenType();
+                if (tokenType == PkgdefTokenType.NewLine)
+                {
+                    break;
+                }
+                else
+                {
+                    tokens.Add(tokenizer.TakeCurrent());
+                    if (tokenType == PkgdefTokenType.RightSquareBracket)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            PkgdefRegistryKeyPathSegment result = new PkgdefRegistryKeyPathSegment(tokens);
+            if (result.GetRightSquareBracket() == null)
+            {
+                onIssue(new PkgdefIssue(result.GetStartIndex(), result.GetLength(), "Missing registry key path right square bracket (']')."));
+            }
+
+            return result;
         }
     }
 }

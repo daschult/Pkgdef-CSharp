@@ -21,7 +21,7 @@ namespace Pkgdef_CSharp
         /// <summary>
         /// Get the last index that is contained by this PkgdefSegment.
         /// </summary>
-        public int GetEndIndex()
+        public virtual int GetEndIndex()
         {
             PreCondition.AssertGreaterThanOrEqualTo(this.GetLength(), 1, "this.GetLength()");
 
@@ -31,7 +31,7 @@ namespace Pkgdef_CSharp
         /// <summary>
         /// Get the index directly after (not contained by) this PkgdefSegment.
         /// </summary>
-        public int GetAfterEndIndex()
+        public virtual int GetAfterEndIndex()
         {
             PreCondition.AssertGreaterThanOrEqualTo(this.GetLength(), 1, "this.GetLength()");
 
@@ -86,6 +86,11 @@ namespace Pkgdef_CSharp
         public static PkgdefSegment LineComment(int startIndex, string text)
         {
             return PkgdefTextSegment.Create(startIndex, text, PkgdefSegmentType.LineComment);
+        }
+
+        public static PkgdefRegistryKeyPathSegment RegistryKeyPath(int startIndex, string text)
+        {
+            return PkgdefDocument.ParseRegistryKeyPath(startIndex, text);
         }
     }
 }

@@ -49,6 +49,8 @@
     <Compile Include="EnumeratorIterator.cs" />
     <Compile Include="Iterator.cs" />
     <Compile Include="IteratorBase.cs" />
+    <Compile Include="ParseException.cs" />
+    <Compile Include="PkgdefRegistryKeyPathSegment.cs" />
     <Compile Include="VersionedCache.cs" />
     <Compile Include="PkgdefIssue.cs" />
     <Compile Include="PkgdefClassifier.cs" />

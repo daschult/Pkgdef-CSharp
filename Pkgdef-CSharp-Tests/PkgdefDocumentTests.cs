@@ -157,6 +157,21 @@ namespace Pkgdef_CSharp_Tests
                     PkgdefSegment.NewLine(212, "\r\n"),
                 });
 
+            ParseTest(
+                "[",
+                new[] { PkgdefSegment.RegistryKeyPath(0, "[") },
+                new[] { PkgdefIssue.Error(0, 1, "Missing registry key path right square bracket (\']\').") });
+            ParseTest(
+                "[hello",
+                new[] { PkgdefSegment.RegistryKeyPath(0, "[hello") },
+                new[] { PkgdefIssue.Error(0, 6, "Missing registry key path right square bracket (\']\').") });
+            ParseTest(
+                "[hello]",
+                new[] { PkgdefSegment.RegistryKeyPath(0, "[hello]") });
+            ParseTest(
+                "[$RootKey$\\Editors\\{19D8ED1B-FFD3-4DFA-B329-E47AD8752E9E}]",
+                new[] { PkgdefSegment.RegistryKeyPath(0, "[$RootKey$\\Editors\\{19D8ED1B-FFD3-4DFA-B329-E47AD8752E9E}]") });
+
             //ParseTest(
             //    new StringBuilder()
             //        .AppendLine("//=================================================================================================")

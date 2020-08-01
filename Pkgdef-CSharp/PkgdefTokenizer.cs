@@ -31,11 +31,27 @@ namespace Pkgdef_CSharp
             return PkgdefTokenizer.Create(Iterator.Create(text), onIssue);
         }
 
+        public static PkgdefTokenizer Create(int startIndex, string text, Action<PkgdefIssue> onIssue)
+        {
+            PreCondition.AssertGreaterThanOrEqualTo(startIndex, 0, nameof(startIndex));
+            PreCondition.AssertNotNull(text, "text");
+
+            return PkgdefTokenizer.Create(startIndex, Iterator.Create(text), onIssue);
+        }
+
         public static PkgdefTokenizer Create(Iterator<char> characters, Action<PkgdefIssue> onIssue)
         {
             PreCondition.AssertNotNull(characters, "characters");
 
             return new PkgdefTokenizer(CurrentIndexIterator.Create(characters), onIssue);
+        }
+
+        public static PkgdefTokenizer Create(int startIndex, Iterator<char> characters, Action<PkgdefIssue> onIssue)
+        {
+            PreCondition.AssertGreaterThanOrEqualTo(startIndex, 0, nameof(startIndex));
+            PreCondition.AssertNotNull(characters, "characters");
+
+            return new PkgdefTokenizer(CurrentIndexIterator.Create(startIndex, characters), onIssue);
         }
 
         /// <inheritdoc/>

@@ -1,4 +1,6 @@
-﻿namespace Pkgdef_CSharp
+﻿using System.Text;
+
+namespace Pkgdef_CSharp
 {
     /// <summary>
     /// An issue that occurs while parsing a PKGDEF document.
@@ -62,6 +64,26 @@
         public string GetMessage()
         {
             return this.message;
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            StringBuilder builder = new StringBuilder();
+
+            builder.Append('{');
+
+            builder.Append($"\"startIndex\":{this.GetStartIndex()}");
+
+            builder.Append(',');
+            builder.Append($"\"length\":{this.GetLength()}");
+
+            builder.Append(',');
+            builder.Append($"\"message\":\"{Strings.Escape(this.GetMessage())}\"");
+
+            builder.Append('}');
+
+            return builder.ToString();
         }
 
         /// <inheritdoc/>

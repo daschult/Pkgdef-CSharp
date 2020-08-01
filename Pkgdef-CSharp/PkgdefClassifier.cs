@@ -223,10 +223,15 @@ namespace Pkgdef_CSharp
                 List<ClassificationSpan> spans = new List<ClassificationSpan>();
                 foreach (PkgdefSegment segment in parsedDocument.GetSegments())
                 {
-                    if (segment.GetSegmentType() == PkgdefSegmentType.LineComment)
+                    switch (segment.GetSegmentType())
                     {
-                        SnapshotSpan segmentSnapshotSpan = new SnapshotSpan(textSnapshot, segment.GetStartIndex(), segment.GetLength());
-                        spans.Add(new ClassificationSpan(segmentSnapshotSpan, this.commentClassificationType));
+                        case PkgdefSegmentType.LineComment:
+                            spans.Add(PkgdefClassifier.CreateClassificationSpan(textSnapshot, segment, this.commentClassificationType));
+                            break;
+
+                        case PkgdefSegmentType.RegistryKeyPath:
+                            spans.Add(PkgdefClassifier.CreateClassificationSpan(textSnapshot, segment, this.registryKeyRelativePathClassificationType));
+                            break;
                     }
                 }
                 classificationSpans = spans;
@@ -236,6 +241,12 @@ namespace Pkgdef_CSharp
             return classificationSpans
                 .Where((ClassificationSpan classificationSpan) => classificationSpan.Span.IntersectsWith(span.Span))
                 .ToList();
+        }
+
+        private static ClassificationSpan CreateClassificationSpan(ITextSnapshot textSnapshot, PkgdefSegment segment, IClassificationType classificationType)
+        {
+            SnapshotSpan segmentSnapshotSpan = new SnapshotSpan(textSnapshot, segment.GetStartIndex(), segment.GetLength());
+            return new ClassificationSpan(segmentSnapshotSpan, classificationType);
         }
     }
 }
