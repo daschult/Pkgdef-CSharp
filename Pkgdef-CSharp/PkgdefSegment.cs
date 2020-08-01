@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 
 namespace Pkgdef_CSharp
 {
@@ -47,6 +48,25 @@ namespace Pkgdef_CSharp
         /// </summary>
         /// <returns>The segment type of this PkgdefSegment.</returns>
         public abstract PkgdefSegmentType GetSegmentType();
+
+        public override string ToString()
+        {
+            StringBuilder builder = new StringBuilder();
+
+            builder.Append('{');
+
+            builder.Append($"\"startIndex\":{this.GetStartIndex()}");
+            
+            builder.Append(',');
+            builder.Append($"\"segmentType\":\"{this.GetSegmentType()}\"");
+
+            builder.Append(',');
+            builder.Append($"\"text\":\"{Strings.Escape(this.GetText())}\"");
+
+            builder.Append('}');
+
+            return builder.ToString();
+        }
 
         public static PkgdefSegment Whitespace(int startIndex, string text)
         {

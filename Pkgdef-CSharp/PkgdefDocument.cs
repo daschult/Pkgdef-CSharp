@@ -16,9 +16,10 @@ namespace Pkgdef_CSharp
         private PkgdefDocument(IReadOnlyList<PkgdefSegment> segments, IReadOnlyList<PkgdefIssue> issues)
         {
             PreCondition.AssertNotNull(segments, nameof(segments));
+            PreCondition.AssertNotNull(issues, nameof(issues));
 
             this.segments = segments;
-            this.issues = issues ?? new List<PkgdefIssue>();
+            this.issues = issues;
         }
 
         /// <summary>
@@ -83,7 +84,7 @@ namespace Pkgdef_CSharp
             return new PkgdefDocument(segments, issues);
         }
 
-        internal static PkgdefSegment ParseSegment(PkgdefTokenizer tokenizer, Action<PkgdefIssue> onIssue)
+        private static PkgdefSegment ParseSegment(PkgdefTokenizer tokenizer, Action<PkgdefIssue> onIssue)
         {
             PreCondition.AssertNotNull(tokenizer, nameof(tokenizer));
             PreCondition.AssertTrue(tokenizer.HasCurrent(), "tokenizer.HasCurrent()");
@@ -150,6 +151,16 @@ namespace Pkgdef_CSharp
             }
 
             return result;
+        }
+
+        private static PkgdefSegment ParseRegistryKeyPath(PkgdefTokenizer tokenizer, Action<PkgdefIssue> onIssue)
+        {
+            PreCondition.AssertNotNull(tokenizer, nameof(tokenizer));
+            PreCondition.AssertTrue(tokenizer.HasCurrent(), "tokenizer.HasCurrent()");
+            PreCondition.AssertEqual(tokenizer.GetCurrent().GetTokenType(), PkgdefTokenType.LeftSquareBracket, "tokenizer.GetCurrent().GetTokenType()");
+            PreCondition.AssertNotNull(onIssue, nameof(onIssue));
+
+            return null;
         }
     }
 }

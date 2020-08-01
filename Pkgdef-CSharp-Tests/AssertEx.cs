@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pkgdef_CSharp;
@@ -64,6 +65,44 @@ namespace Pkgdef_CSharp_Tests
             }
 
             return actualException as T;
+        }
+
+        /// <summary>
+        /// Assert that the values in the provided IEnumerables are equal and in the same order.
+        /// </summary>
+        /// <typeparam name="T">The type of values to compare.</typeparam>
+        /// <param name="expected">The expected values.</param>
+        /// <param name="values">The values to check.</param>
+        public static void AreEqual<T>(IEnumerable<T> expected, IEnumerable<T> values)
+        {
+            if (!object.Equals(expected, values))
+            {
+                if (expected == null)
+                {
+                    Assert.Fail("Expected the value to be null.");
+                }
+                else if (values == null)
+                {
+                    Assert.Fail("Expected the value to be non-null.");
+                }
+                else
+                {
+                    Iterator<T> valueIterator = Iterator.Create(expected);
+                    Iterator<T> expectedIterator = Iterator.Create(values);
+
+                    int index = 0;
+                    while (valueIterator.Next() & expectedIterator.Next())
+                    {
+                        Assert.AreEqual(valueIterator.GetCurrent(), expectedIterator.GetCurrent(), $"Values at index {index} are not equal.");
+                        index++;
+                    }
+
+                    if (valueIterator.HasCurrent() || expectedIterator.HasCurrent())
+                    {
+                        Assert.AreEqual(expected.Count(), values.Count(), "Element counts are not equal.");
+                    }
+                }
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pkgdef_CSharp;
 
@@ -29,7 +30,7 @@ namespace Pkgdef_CSharp_Tests
                     }
                     else
                     {
-                        CollectionAssert.AreEqual(expectedSegments, document.GetSegments().ToArray());
+                        AssertEx.AreEqual(expectedSegments, document.GetSegments());
                     }
 
                     if (expectedIssues == null)
@@ -38,7 +39,7 @@ namespace Pkgdef_CSharp_Tests
                     }
                     else
                     {
-                        CollectionAssert.AreEqual(expectedIssues, document.GetIssues().ToArray());
+                        AssertEx.AreEqual(expectedIssues, document.GetIssues());
                     }
                 }
             }
@@ -137,6 +138,47 @@ namespace Pkgdef_CSharp_Tests
                     PkgdefSegment.NewLine(7, "\n"),
                     PkgdefSegment.LineComment(8, "//c"),
                 });
+
+            ParseTest(
+                new StringBuilder()
+                    .AppendLine("//=================================================================================================")
+                    .AppendLine("// Build")
+                    .AppendLine("//=================================================================================================")
+                    .AppendLine()
+                    .ToString(),
+                new[]
+                {
+                    PkgdefSegment.LineComment(0, "//================================================================================================="),
+                    PkgdefSegment.NewLine(99, "\r\n"),
+                    PkgdefSegment.LineComment(101, "// Build"),
+                    PkgdefSegment.NewLine(109, "\r\n"),
+                    PkgdefSegment.LineComment(111, "//================================================================================================="),
+                    PkgdefSegment.NewLine(210, "\r\n"),
+                    PkgdefSegment.NewLine(212, "\r\n"),
+                });
+
+            //ParseTest(
+            //    new StringBuilder()
+            //        .AppendLine("//=================================================================================================")
+            //        .AppendLine("// Build")
+            //        .AppendLine("//=================================================================================================")
+            //        .AppendLine()
+            //        .AppendLine("[$RootKey$\\Editors\\{19D8ED1B-FFD3-4DFA-B329-E47AD8752E9E}]")
+            //        .AppendLine("@=\"RequestEditorFactory\"")
+            //        .AppendLine("\"DisplayName\"=\"#108\"")
+            //        .AppendLine("\"DeferUntilIntellisenseIsReady\"=dword:00000000")
+            //        .AppendLine("\"Package\"=\"{739f34b3-9ba6-4356-9178-ac3ea81bdf47}\"")
+            //        .AppendLine("\"CommonPhysicalViewAttributes\"=dword:3")
+            //        .ToString(),
+            //    new[]
+            //    {
+            //        PkgdefSegment.LineComment(0, "//================================================================================================="),
+            //        PkgdefSegment.NewLine(50, "\r\n"),
+            //        PkgdefSegment.LineComment(70, "// Build"),
+            //        PkgdefSegment.NewLine(75, "\r\n"),
+            //        PkgdefSegment.LineComment(80, "//================================================================================================="),
+            //        PkgdefSegment.NewLine(85, "\r\n"),
+            //    });
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pkgdef_CSharp;
 
@@ -60,6 +61,52 @@ namespace Pkgdef_CSharp_Tests
             Assert.IsNotNull(exception);
             Assert.IsInstanceOfType(exception, typeof(ArgumentException));
             Assert.AreEqual("fake-message", exception.Message);
+        }
+
+        [TestMethod]
+        public void AreEqual_IEnumerable_WithNullAndNull()
+        {
+            AssertEx.AreEqual((IEnumerable<int>)null, (IEnumerable<int>)null);
+        }
+
+        [TestMethod]
+        public void AreEqual_IEnumerable_WithNullAndEmpty()
+        {
+            AssertEx.Throws(() => AssertEx.AreEqual((IEnumerable<int>)null, new int[0]),
+                new AssertFailedException("Assert.Fail failed. Expected the value to be null."));
+        }
+
+        [TestMethod]
+        public void AreEqual_IEnumerable_WithEmptyAndNull()
+        {
+            AssertEx.Throws(() => AssertEx.AreEqual(new int[0], (IEnumerable<int>)null),
+                new AssertFailedException("Assert.Fail failed. Expected the value to be non-null."));
+        }
+
+        [TestMethod]
+        public void AreEqual_IEnumerable_WithEmptyAndEmpty()
+        {
+            AssertEx.AreEqual(new int[0], new int[0]);
+        }
+
+        [TestMethod]
+        public void AreEqual_IEnumerable_WithDifferentLengths()
+        {
+            AssertEx.Throws(() => AssertEx.AreEqual(new int[] { 0, 1, 2 }, new int[] { 0 }),
+                new AssertFailedException("Assert.AreEqual failed. Expected:<3>. Actual:<1>. Element counts are not equal."));
+        }
+
+        [TestMethod]
+        public void AreEqual_IEnumerable_WithDifferentElements()
+        {
+            AssertEx.Throws(() => AssertEx.AreEqual(new int[] { 0, 1, 2 }, new int[] { 0, 3, 2 }),
+                new AssertFailedException("Assert.AreEqual failed. Expected:<1>. Actual:<3>. Values at index 1 are not equal."));
+        }
+
+        [TestMethod]
+        public void AreEqual_IEnumerable_WithEqualElements()
+        {
+            AssertEx.AreEqual(new int[] { 0, 1, 2 }, new int[] { 0, 1, 2 });
         }
     }
 }

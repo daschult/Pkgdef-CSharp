@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.IO;
+using System.Linq;
 using System.Windows.Media;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
@@ -175,6 +177,7 @@ namespace Pkgdef_CSharp
         private readonly IClassificationType registryKeyDataItemNumberValueClassificationType;
         private readonly IClassificationType registryKeyDataItemStringValueClassificationType;
         private readonly IClassificationType commentClassificationType;
+        private readonly VersionedCache<ITextBuffer,int,IReadOnlyList<ClassificationSpan>> textSnapshotClassifications;
 
         internal PkgdefClassifier(IClassificationTypeRegistryService registry)
         {
@@ -186,6 +189,8 @@ namespace Pkgdef_CSharp
             this.registryKeyDataItemNumberValueClassificationType = registry.GetClassificationType(PkgdefClassifier.TypeNames.RegistryKeyDataItemNumberValue);
             this.registryKeyDataItemStringValueClassificationType = registry.GetClassificationType(PkgdefClassifier.TypeNames.RegistryKeyDataItemStringValue);
             this.commentClassificationType = registry.GetClassificationType(PkgdefClassifier.TypeNames.Comment);
+
+            this.textSnapshotClassifications = new VersionedCache<ITextBuffer, int, IReadOnlyList<ClassificationSpan>>();
         }
 
 #pragma warning disable 67
@@ -206,7 +211,31 @@ namespace Pkgdef_CSharp
         {
             PreCondition.AssertNotNull(span, nameof(span));
 
-            return new List<ClassificationSpan>();
+            ITextSnapshot textSnapshot = span.Snapshot;
+            ITextBuffer textBuffer = textSnapshot.TextBuffer;
+            ITextVersion textVersion = textSnapshot.Version;
+            int textVersionNumber = textVersion.VersionNumber;
+
+            if (!this.textSnapshotClassifications.TryGet(textBuffer, textVersionNumber, out IReadOnlyList<ClassificationSpan> classificationSpans))
+            {
+                PkgdefDocument parsedDocument = PkgdefDocument.Parse(textSnapshot.GetText());
+
+                List<ClassificationSpan> spans = new List<ClassificationSpan>();
+                foreach (PkgdefSegment segment in parsedDocument.GetSegments())
+                {
+                    if (segment.GetSegmentType() == PkgdefSegmentType.LineComment)
+                    {
+                        SnapshotSpan segmentSnapshotSpan = new SnapshotSpan(textSnapshot, segment.GetStartIndex(), segment.GetLength());
+                        spans.Add(new ClassificationSpan(segmentSnapshotSpan, this.commentClassificationType));
+                    }
+                }
+                classificationSpans = spans;
+                this.textSnapshotClassifications.Set(textBuffer, textVersionNumber, classificationSpans);
+            }
+
+            return classificationSpans
+                .Where((ClassificationSpan classificationSpan) => classificationSpan.Span.IntersectsWith(span.Span))
+                .ToList();
         }
     }
 }
