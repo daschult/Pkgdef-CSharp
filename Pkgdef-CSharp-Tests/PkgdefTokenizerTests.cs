@@ -56,20 +56,14 @@ namespace Pkgdef_CSharp_Tests
                 "",
                 new PkgdefToken[0]);
 
-            // Unrecognized tokens
             CreateTest(
-                "a",
-                new[] { PkgdefToken.Unrecognized(0, "a") });
-            CreateTest(
-                "abc",
-                new[]
-                {
-                    PkgdefToken.Unrecognized(0, "a"),
-                    PkgdefToken.Unrecognized(1, "b"),
-                    PkgdefToken.Unrecognized(2, "c"),
-                });
+                "/",
+                new[] { PkgdefToken.ForwardSlash(0) });
 
-            // Whitespace tokens
+            CreateTest(
+                "\\",
+                new[] { PkgdefToken.Backslash(0) });
+
             CreateTest(
                 " ",
                 new[] { PkgdefToken.Whitespace(0, " ") });
@@ -89,95 +83,82 @@ namespace Pkgdef_CSharp_Tests
                 "\r",
                 new[] { PkgdefToken.Whitespace(0, "\r") });
             CreateTest(
+                " \r ",
+                new[] { PkgdefToken.Whitespace(0, " \r ") });
+
+            CreateTest(
                 "\n",
-                new[] { PkgdefToken.Whitespace(0, "\n") });
+                new[] { PkgdefToken.NewLine(0, "\n") });
             CreateTest(
                 "\r\n",
-                new[] { PkgdefToken.Whitespace(0, "\r\n") });
+                new[] { PkgdefToken.NewLine(0, "\r\n") });
 
-            // Line comment
-            CreateTest(
-                "/",
-                new[] { PkgdefToken.Unrecognized(0, "/") },
-                new[] { PkgdefIssue.Error(0, 1, "Missing the line-comment's second forward slash ('/').") });
-            CreateTest(
-                "/ ",
-                new[]
-                {
-                    PkgdefToken.Unrecognized(0, "/"),
-                    PkgdefToken.Whitespace(1, " "),
-                },
-                new[] { PkgdefIssue.Error(1, 1, "Expected the line-comment's second forward slash ('/').") });
-            CreateTest(
-                "//",
-                new[] { PkgdefToken.LineComment(0, "//") });
-            CreateTest(
-                "// hello",
-                new[] { PkgdefToken.LineComment(0, "// hello") });
-            CreateTest(
-                "// hello\r",
-                new[] { PkgdefToken.LineComment(0, "// hello\r") });
-            CreateTest(
-                "// hello there\n",
-                new[] { PkgdefToken.LineComment(0, "// hello there\n") });
-            CreateTest(
-                "// hello there\r\n",
-                new[] { PkgdefToken.LineComment(0, "// hello there\r\n") });
-            CreateTest(
-                "// hello there\n   ",
-                new[]
-                {
-                    PkgdefToken.LineComment(0, "// hello there\n"),
-                    PkgdefToken.Whitespace(15, "   "),
-                });
-            CreateTest(
-                "// hello there\r\n   ",
-                new[]
-                {
-                    PkgdefToken.LineComment(0, "// hello there\r\n"),
-                    PkgdefToken.Whitespace(16, "   "),
-                });
-            CreateTest(
-                "//a\n//b\n//c",
-                new[]
-                {
-                    PkgdefToken.LineComment(0, "//a\n"),
-                    PkgdefToken.LineComment(4, "//b\n"),
-                    PkgdefToken.LineComment(8, "//c"),
-                });
-
-            // Quoted strings
-            CreateTest(
-                "\"",
-                new[] { PkgdefToken.QuotedString(0, "\"") },
-                new[] { PkgdefIssue.Error(0, 1, "Missing quoted-string's closing double-quote ('\"').") });
-            CreateTest(
-                "\"abc",
-                new[] { PkgdefToken.QuotedString(0, "\"abc") },
-                new[] { PkgdefIssue.Error(0, 4, "Missing quoted-string's closing double-quote ('\"').") });
-            CreateTest(
-                "\"abc\n",
-                new[]
-                {
-                    PkgdefToken.QuotedString(0, "\"abc"),
-                    PkgdefToken.Whitespace(4, "\n"),
-                },
-                new[] { PkgdefIssue.Error(0, 4, "Missing quoted-string's closing double-quote ('\"').") });
-            CreateTest(
-                "\"abc\"",
-                new[] { PkgdefToken.QuotedString(0, "\"abc\"") });
-            CreateTest(
-                "\"abc\"\"d\"",
-                new[]
-                {
-                    PkgdefToken.QuotedString(0, "\"abc\""),
-                    PkgdefToken.QuotedString(5, "\"d\""),
-                });
-
-            // At symbol
             CreateTest(
                 "@",
                 new[] { PkgdefToken.AtSign(0) });
+
+            CreateTest(
+                "=",
+                new[] { PkgdefToken.EqualsSign(0) });
+
+            CreateTest(
+                "$",
+                new[] { PkgdefToken.DollarSign(0) });
+
+            CreateTest(
+                "[",
+                new[] { PkgdefToken.LeftSquareBracket(0) });
+
+            CreateTest(
+                "]",
+                new[] { PkgdefToken.RightSquareBracket(0) });
+
+            CreateTest(
+                "\"",
+                new[] { PkgdefToken.DoubleQuote(0) });
+
+            CreateTest(
+                ":",
+                new[] { PkgdefToken.Colon(0) });
+
+            CreateTest(
+                "{",
+                new[] { PkgdefToken.LeftCurlyBracket(0) });
+
+            CreateTest(
+                "}",
+                new[] { PkgdefToken.RightCurlyBracket(0) });
+
+            CreateTest(
+                "-",
+                new[] { PkgdefToken.Dash(0) });
+
+            CreateTest(
+                "a",
+                new[] { PkgdefToken.Letters(0, "a") });
+            CreateTest(
+                "abc",
+                new[] { PkgdefToken.Letters(0, "abc") });
+
+            CreateTest(
+                "1",
+                new[] { PkgdefToken.Digits(0, "1") });
+            CreateTest(
+                "123",
+                new[] { PkgdefToken.Digits(0, "123") });
+
+            // Unrecognized tokens
+            CreateTest(
+                "&",
+                new[] { PkgdefToken.Unrecognized(0, '&') });
+            CreateTest(
+                "&^%",
+                new[]
+                {
+                    PkgdefToken.Unrecognized(0, '&'),
+                    PkgdefToken.Unrecognized(1, '^'),
+                    PkgdefToken.Unrecognized(2, '%'),
+                });
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace Pkgdef_CSharp
@@ -8,20 +9,19 @@ namespace Pkgdef_CSharp
     /// </summary>
     internal class PkgdefTokenizer : IteratorBase<PkgdefToken>
     {
-        private readonly Iterator<char> characters;
+        private readonly CurrentIndexIterator<char> characters;
         private readonly Action<PkgdefIssue> onIssue;
-        private int currentCharacterIndex;
-        private PkgdefToken currentToken;
+        private readonly Queue<PkgdefToken> tokenQueue;
         private bool hasStarted;
 
-        private PkgdefTokenizer(Iterator<char> characters, Action<PkgdefIssue> onIssue)
+        private PkgdefTokenizer(CurrentIndexIterator<char> characters, Action<PkgdefIssue> onIssue)
         {
             PreCondition.AssertNotNull(characters, nameof(characters));
             PreCondition.AssertNotNull(onIssue, nameof(onIssue));
 
             this.characters = characters;
             this.onIssue = onIssue;
-            this.currentCharacterIndex = 0;
+            this.tokenQueue = new Queue<PkgdefToken>();
         }
 
         public static PkgdefTokenizer Create(string text, Action<PkgdefIssue> onIssue)
@@ -33,7 +33,9 @@ namespace Pkgdef_CSharp
 
         public static PkgdefTokenizer Create(Iterator<char> characters, Action<PkgdefIssue> onIssue)
         {
-            return new PkgdefTokenizer(characters, onIssue);
+            PreCondition.AssertNotNull(characters, "characters");
+
+            return new PkgdefTokenizer(CurrentIndexIterator.Create(characters), onIssue);
         }
 
         /// <inheritdoc/>
@@ -43,7 +45,7 @@ namespace Pkgdef_CSharp
             {
                 PreCondition.AssertTrue(this.HasCurrent(), "this.HasCurrent()");
 
-                return this.currentToken;
+                return this.tokenQueue.Peek();
             }
         }
 
@@ -51,12 +53,13 @@ namespace Pkgdef_CSharp
         public override void Dispose()
         {
             this.characters.Dispose();
+            this.tokenQueue.Clear();
         }
 
         /// <inheritdoc/>
         public override bool HasCurrent()
         {
-            return this.currentToken != null;
+            return this.tokenQueue.Count > 0;
         }
 
         /// <inheritdoc/>
@@ -71,39 +74,97 @@ namespace Pkgdef_CSharp
             this.characters.EnsureHasStarted();
             this.hasStarted = true;
 
-            if (!this.HasCurrentCharacter())
+            if (this.HasCurrent())
             {
-                this.currentToken = null;
+                this.tokenQueue.Dequeue();
             }
-            else
+
+            if (this.characters.HasCurrent())
             {
-                switch (this.GetCurrentCharacter())
+                switch (this.characters.GetCurrent())
                 {
                     case '/':
-                        this.currentToken = this.ReadLineComment();
+                        this.tokenQueue.Enqueue(PkgdefToken.ForwardSlash(this.characters.GetCurrentIndex()));
+                        this.characters.Next();
+                        break;
+
+                    case '\\':
+                        this.tokenQueue.Enqueue(PkgdefToken.Backslash(this.characters.GetCurrentIndex()));
+                        this.characters.Next();
                         break;
 
                     case '\"':
-                        this.currentToken = this.ReadQuotedString();
+                        this.tokenQueue.Enqueue(PkgdefToken.DoubleQuote(this.characters.GetCurrentIndex()));
+                        this.characters.Next();
                         break;
 
                     case '@':
-                        this.currentToken = PkgdefToken.AtSign(this.currentCharacterIndex);
-                        this.NextCharacter();
+                        this.tokenQueue.Enqueue(PkgdefToken.AtSign(this.characters.GetCurrentIndex()));
+                        this.characters.Next();
+                        break;
+
+                    case '\n':
+                        this.tokenQueue.Enqueue(PkgdefToken.NewLine(this.characters.GetCurrentIndex(), "\n"));
+                        this.characters.Next();
+                        break;
+
+                    case '=':
+                        this.tokenQueue.Enqueue(PkgdefToken.EqualsSign(this.characters.GetCurrentIndex()));
+                        this.characters.Next();
+                        break;
+
+                    case '$':
+                        this.tokenQueue.Enqueue(PkgdefToken.DollarSign(this.characters.GetCurrentIndex()));
+                        this.characters.Next();
+                        break;
+
+                    case '[':
+                        this.tokenQueue.Enqueue(PkgdefToken.LeftSquareBracket(this.characters.GetCurrentIndex()));
+                        this.characters.Next();
+                        break;
+
+                    case ']':
+                        this.tokenQueue.Enqueue(PkgdefToken.RightSquareBracket(this.characters.GetCurrentIndex()));
+                        this.characters.Next();
+                        break;
+
+                    case ':':
+                        this.tokenQueue.Enqueue(PkgdefToken.Colon(this.characters.GetCurrentIndex()));
+                        this.characters.Next();
+                        break;
+
+                    case '{':
+                        this.tokenQueue.Enqueue(PkgdefToken.LeftCurlyBracket(this.characters.GetCurrentIndex()));
+                        this.characters.Next();
+                        break;
+
+                    case '}':
+                        this.tokenQueue.Enqueue(PkgdefToken.RightCurlyBracket(this.characters.GetCurrentIndex()));
+                        this.characters.Next();
+                        break;
+
+                    case '-':
+                        this.tokenQueue.Enqueue(PkgdefToken.Dash(this.characters.GetCurrentIndex()));
+                        this.characters.Next();
                         break;
 
                     default:
-                        if (PkgdefTokenizer.IsWhitespaceCharacter(this.GetCurrentCharacter()))
+                        if (PkgdefTokenizer.IsWhitespaceCharacter(this.characters.GetCurrent()))
                         {
-                            this.currentToken = this.ReadWhitespace();
+                            this.ReadWhitespace();
+                        }
+                        else if (PkgdefTokenizer.IsLetter(this.characters.GetCurrent()))
+                        {
+                            this.ReadLetters();
+                        }
+                        else if (PkgdefTokenizer.IsDigit(this.characters.GetCurrent()))
+                        {
+                            this.ReadDigits();
                         }
                         else
                         {
-                            this.currentToken = new PkgdefToken(
-                                this.currentCharacterIndex,
-                                this.GetCurrentCharacter(),
-                                PkgdefTokenType.Unrecognized);
-                            this.NextCharacter();
+                            this.tokenQueue.Enqueue(PkgdefToken.Unrecognized(characters.GetCurrentIndex(), characters.GetCurrent()));
+                            this.characters.Next();
                         }
                         break;
                 }
@@ -112,132 +173,89 @@ namespace Pkgdef_CSharp
             return this.HasCurrent();
         }
 
-        private bool HasCurrentCharacter()
+        private void ReadWhitespace()
         {
-            return this.characters.HasCurrent();
-        }
+            PreCondition.AssertTrue(this.characters.HasCurrent(), "this.characters.HasCurrent()");
+            PreCondition.AssertTrue(PkgdefTokenizer.IsWhitespaceCharacter(this.characters.GetCurrent()), "PkgdefTokenizer.IsWhitespaceCharacter(this.characters.GetCurrent())");
 
-        private char GetCurrentCharacter()
-        {
-            PreCondition.AssertTrue(this.HasCurrentCharacter(), "this.HasCurrentCharacter()");
-
-            return this.characters.Current;
-        }
-
-        private bool NextCharacter()
-        {
-            bool result = this.characters.Next();
-            if (result)
+            PkgdefToken newLineToken = null;
+            int startIndex = this.characters.GetCurrentIndex();
+            StringBuilder builder = new StringBuilder();
+            while (this.characters.HasCurrent() && PkgdefTokenizer.IsWhitespaceCharacter(this.characters.GetCurrent()))
             {
-                this.currentCharacterIndex++;
-            }
-            return result;
-        }
-
-        private char TakeCurrentCharacter()
-        {
-            char result = this.GetCurrentCharacter();
-            this.NextCharacter();
-
-            return result;
-        }
-
-        /// <summary>
-        /// Get whether or not the provided character is a whitespace character.
-        /// </summary>
-        /// <param name="character">The character to check.</param>
-        /// <returns>Whether or not the provided character is a whitespace character.</returns>
-        internal static bool IsWhitespaceCharacter(char character)
-        {
-            return character == ' ' || character == '\t' || character == '\r' || character == '\n';
-        }
-
-        private PkgdefToken ReadWhitespace()
-        {
-            PreCondition.AssertTrue(this.HasCurrentCharacter(), "this.HasCurrentCharacter()");
-            PreCondition.AssertTrue(PkgdefTokenizer.IsWhitespaceCharacter(this.GetCurrentCharacter()), "PkgdefTokenizer.IsWhitespaceCharacter(this.GetCurrentCharacter())");
-
-            int startIndex = this.currentCharacterIndex;
-            StringBuilder builder = new StringBuilder().Append(this.TakeCurrentCharacter());
-            while (this.HasCurrentCharacter() && PkgdefTokenizer.IsWhitespaceCharacter(this.GetCurrentCharacter()))
-            {
-                builder.Append(this.TakeCurrentCharacter());
-            }
-            string text = builder.ToString();
-
-            return PkgdefToken.Whitespace(startIndex, text);
-        }
-
-        private PkgdefToken ReadLineComment()
-        {
-            PreCondition.AssertTrue(this.HasCurrentCharacter(), "this.HasCurrentCharacter()");
-            PreCondition.AssertEqual(this.GetCurrentCharacter(), '/', "this.GetCurrentCharacter()");
-
-            PkgdefToken result;
-
-            int startIndex = this.currentCharacterIndex;
-            StringBuilder builder = new StringBuilder().Append(this.TakeCurrentCharacter());
-            if (!this.HasCurrentCharacter())
-            {
-                onIssue.Invoke(new PkgdefIssue(startIndex, 1, "Missing the line-comment's second forward slash ('/')."));
-                result = PkgdefToken.Unrecognized(startIndex, builder.ToString());
-            }
-            else if (this.GetCurrentCharacter() != '/')
-            {
-                onIssue.Invoke(new PkgdefIssue(startIndex + 1, 1, "Expected the line-comment's second forward slash ('/')."));
-                result = PkgdefToken.Unrecognized(startIndex, builder.ToString());
-            }
-            else
-            {
-                builder.Append(this.TakeCurrentCharacter());
-                while (this.HasCurrentCharacter())
+                if (this.characters.GetCurrent() != '\r')
                 {
-                    char character = this.TakeCurrentCharacter();
-                    builder.Append(character);
-                    if (character == '\n')
+                    builder.Append(this.characters.TakeCurrent());
+                }
+                else
+                {
+                    int newLineStartIndex = this.characters.GetCurrentIndex();
+                    if (this.characters.Next() && this.characters.GetCurrent() == '\n')
                     {
+                        newLineToken = PkgdefToken.NewLine(newLineStartIndex, "\r\n");
+                        this.characters.Next();
                         break;
                     }
+                    else
+                    {
+                        builder.Append('\r');
+                    }
                 }
-                string text = builder.ToString();
-
-                result = PkgdefToken.LineComment(startIndex, text);
             }
 
-            return result;
+            if (builder.Length > 0)
+            {
+                this.tokenQueue.Enqueue(PkgdefToken.Whitespace(startIndex, builder.ToString()));
+            }
+            if (newLineToken != null)
+            {
+                this.tokenQueue.Enqueue(newLineToken);
+            }
         }
 
-        private PkgdefToken ReadQuotedString()
+        private void ReadLetters()
         {
-            PreCondition.AssertTrue(this.HasCurrentCharacter(), "this.HasCurrentCharacter()");
-            PreCondition.AssertEqual(this.GetCurrentCharacter(), '\"', "this.GetCurrentCharacter()");
+            PreCondition.AssertTrue(this.characters.HasCurrent(), "this.characters.HasCurrent()");
+            PreCondition.AssertTrue(PkgdefTokenizer.IsLetter(this.characters.GetCurrent()), "PkgdefTokenizer.IsLetter(this.characters.GetCurrent())");
 
-            int startIndex = this.currentCharacterIndex;
-            StringBuilder builder = new StringBuilder().Append(this.TakeCurrentCharacter());
-            bool closed = false;
-            while (this.HasCurrentCharacter())
+            int startIndex = this.characters.GetCurrentIndex();
+            StringBuilder builder = new StringBuilder().Append(this.characters.TakeCurrent());
+            while (this.characters.HasCurrent() && PkgdefTokenizer.IsLetter(this.characters.GetCurrent()))
             {
-                char character = this.GetCurrentCharacter();
-                if (character == '\n')
-                {
-                    break;
-                }
-                builder.Append(character);
-                this.NextCharacter();
-                if (character == '\"')
-                {
-                    closed = true;
-                    break;
-                }
+                builder.Append(this.characters.TakeCurrent());
             }
 
-            string text = builder.ToString();
-            if (!closed)
+            this.tokenQueue.Enqueue(PkgdefToken.Letters(startIndex, builder.ToString()));
+        }
+
+        private void ReadDigits()
+        {
+            PreCondition.AssertTrue(this.characters.HasCurrent(), "this.characters.HasCurrent()");
+            PreCondition.AssertTrue(PkgdefTokenizer.IsDigit(this.characters.GetCurrent()), "PkgdefTokenizer.IsDigit(this.characters.GetCurrent())");
+
+            int startIndex = this.characters.GetCurrentIndex();
+            StringBuilder builder = new StringBuilder().Append(this.characters.TakeCurrent());
+            while (this.characters.HasCurrent() && PkgdefTokenizer.IsDigit(this.characters.GetCurrent()))
             {
-                onIssue.Invoke(PkgdefIssue.Error(startIndex, text.Length, "Missing quoted-string's closing double-quote ('\"')."));
+                builder.Append(this.characters.TakeCurrent());
             }
-            
-            return PkgdefToken.QuotedString(startIndex, text);
+
+            this.tokenQueue.Enqueue(PkgdefToken.Digits(startIndex, builder.ToString()));
+        }
+
+        public static bool IsWhitespaceCharacter(char character)
+        {
+            return character == ' ' || character == '\t' || character == '\r';
+        }
+
+        public static bool IsLetter(char character)
+        {
+            return char.IsLetter(character);
+        }
+
+        public static bool IsDigit(char character)
+        {
+            return char.IsDigit(character);
         }
     }
 }

@@ -24,9 +24,14 @@
             this.tokenType = tokenType;
         }
 
-        public static PkgdefToken LineComment(int startIndex, string text)
+        public static PkgdefToken ForwardSlash(int startIndex)
         {
-            return new PkgdefToken(startIndex, text, PkgdefTokenType.LineComment);
+            return new PkgdefToken(startIndex, '/', PkgdefTokenType.ForwardSlash);
+        }
+
+        public static PkgdefToken Backslash(int startIndex)
+        {
+            return new PkgdefToken(startIndex, '\\', PkgdefTokenType.Backslash);
         }
 
         public static PkgdefToken Whitespace(int startIndex, string text)
@@ -34,9 +39,9 @@
             return new PkgdefToken(startIndex, text, PkgdefTokenType.Whitespace);
         }
 
-        public static PkgdefToken QuotedString(int startIndex, string text)
+        public static PkgdefToken NewLine(int startIndex, string text)
         {
-            return new PkgdefToken(startIndex, text, PkgdefTokenType.QuotedString);
+            return new PkgdefToken(startIndex, text, PkgdefTokenType.NewLine);
         }
 
         public static PkgdefToken AtSign(int startIndex)
@@ -44,9 +49,64 @@
             return new PkgdefToken(startIndex, "@", PkgdefTokenType.AtSign);
         }
 
-        public static PkgdefToken Unrecognized(int startIndex, string text)
+        public static PkgdefToken EqualsSign(int startIndex)
         {
-            return new PkgdefToken(startIndex, text, PkgdefTokenType.Unrecognized);
+            return new PkgdefToken(startIndex, "=", PkgdefTokenType.EqualsSign);
+        }
+
+        public static PkgdefToken DollarSign(int startIndex)
+        {
+            return new PkgdefToken(startIndex, "$", PkgdefTokenType.DollarSign);
+        }
+
+        public static PkgdefToken LeftSquareBracket(int startIndex)
+        {
+            return new PkgdefToken(startIndex, "[", PkgdefTokenType.LeftSquareBracket);
+        }
+
+        public static PkgdefToken RightSquareBracket(int startIndex)
+        {
+            return new PkgdefToken(startIndex, "]", PkgdefTokenType.RightSquareBracket);
+        }
+
+        public static PkgdefToken DoubleQuote(int startIndex)
+        {
+            return new PkgdefToken(startIndex, "\"", PkgdefTokenType.DoubleQuote);
+        }
+
+        public static PkgdefToken Colon(int startIndex)
+        {
+            return new PkgdefToken(startIndex, ":", PkgdefTokenType.Colon);
+        }
+
+        public static PkgdefToken LeftCurlyBracket(int startIndex)
+        {
+            return new PkgdefToken(startIndex, '{', PkgdefTokenType.LeftCurlyBracket);
+        }
+
+        public static PkgdefToken RightCurlyBracket(int startIndex)
+        {
+            return new PkgdefToken(startIndex, '}', PkgdefTokenType.RightCurlyBracket);
+        }
+
+        public static PkgdefToken Dash(int startIndex)
+        {
+            return new PkgdefToken(startIndex, '-', PkgdefTokenType.Dash);
+        }
+
+        public static PkgdefToken Letters(int startIndex, string text)
+        {
+            return new PkgdefToken(startIndex, text, PkgdefTokenType.Letters);
+        }
+
+        public static PkgdefToken Digits(int startIndex, string text)
+        {
+            return new PkgdefToken(startIndex, text, PkgdefTokenType.Digits);
+        }
+
+        public static PkgdefToken Unrecognized(int startIndex, char character)
+        {
+            return new PkgdefToken(startIndex, character, PkgdefTokenType.Unrecognized);
         }
 
         /// <summary>

@@ -37,15 +37,6 @@ namespace Pkgdef_CSharp_Tests
         }
 
         [TestMethod]
-        public void LineComment()
-        {
-            PkgdefToken token = PkgdefToken.LineComment(1, "// hello");
-            Assert.AreEqual(1, token.GetStartIndex());
-            Assert.AreEqual("// hello", token.GetText());
-            Assert.AreEqual(PkgdefTokenType.LineComment, token.GetTokenType());
-        }
-
-        [TestMethod]
         public void Whitespace()
         {
             PkgdefToken token = PkgdefToken.Whitespace(1, "  \t");
@@ -55,20 +46,11 @@ namespace Pkgdef_CSharp_Tests
         }
 
         [TestMethod]
-        public void QuotedString()
-        {
-            PkgdefToken token = PkgdefToken.QuotedString(1, "\"hello\"");
-            Assert.AreEqual(1, token.GetStartIndex());
-            Assert.AreEqual("\"hello\"", token.GetText());
-            Assert.AreEqual(PkgdefTokenType.QuotedString, token.GetTokenType());
-        }
-
-        [TestMethod]
         public void Unrecognized()
         {
-            PkgdefToken token = PkgdefToken.Unrecognized(1, "abc");
+            PkgdefToken token = PkgdefToken.Unrecognized(1, '&');
             Assert.AreEqual(1, token.GetStartIndex());
-            Assert.AreEqual("abc", token.GetText());
+            Assert.AreEqual("&", token.GetText());
             Assert.AreEqual(PkgdefTokenType.Unrecognized, token.GetTokenType());
         }
     }

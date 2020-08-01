@@ -1,39 +1,21 @@
-﻿namespace Pkgdef_CSharp
+﻿using System.Collections.Generic;
+
+namespace Pkgdef_CSharp
 {
     /// <summary>
     /// A segment within a PKGDEF document.
     /// </summary>
-    internal class PkgdefSegment
+    internal abstract class PkgdefSegment
     {
-        private readonly int startIndex;
-        private readonly string text;
-        private readonly PkgdefSegmentType segmentType;
-
-        public PkgdefSegment(int startIndex, string text, PkgdefSegmentType segmentType)
-        {
-            PreCondition.AssertGreaterThanOrEqualTo(startIndex, 0, nameof(startIndex));
-            PreCondition.AssertNotNullAndNotEmpty(text, nameof(text));
-            
-            this.startIndex = startIndex;
-            this.text = text;
-            this.segmentType = segmentType;
-        }
-
         /// <summary>
         /// Get the start index in the document where the PkgdefSegment begins.
         /// </summary>
-        public int GetStartIndex()
-        {
-            return this.startIndex;
-        }
+        public abstract int GetStartIndex();
 
         /// <summary>
         /// Get the number of characters that are contained by this PkgdefSegment.
         /// </summary>
-        public int GetLength()
-        {
-            return this.text.Length;
-        }
+        public abstract int GetLength();
 
         /// <summary>
         /// Get the last index that is contained by this PkgdefSegment.
@@ -58,18 +40,32 @@
         /// <summary>
         /// Get the text of this PkgdefSegment.
         /// </summary>
-        public string GetText()
-        {
-            return this.text;
-        }
+        public abstract string GetText();
 
         /// <summary>
         /// Get the segment type of this PkgdefSegment.
         /// </summary>
         /// <returns>The segment type of this PkgdefSegment.</returns>
-        public PkgdefSegmentType GetSegmentType()
+        public abstract PkgdefSegmentType GetSegmentType();
+
+        public static PkgdefSegment Whitespace(int startIndex, string text)
         {
-            return this.segmentType;
+            return PkgdefTextSegment.Create(startIndex, text, PkgdefSegmentType.Whitespace);
+        }
+
+        public static PkgdefSegment NewLine(int startIndex, string text)
+        {
+            return PkgdefTextSegment.Create(startIndex, text, PkgdefSegmentType.NewLine);
+        }
+
+        public static PkgdefSegment Unrecognized(int startIndex, string text)
+        {
+            return PkgdefTextSegment.Create(startIndex, text, PkgdefSegmentType.Unrecognized);
+        }
+
+        public static PkgdefSegment LineComment(int startIndex, string text)
+        {
+            return PkgdefTextSegment.Create(startIndex, text, PkgdefSegmentType.LineComment);
         }
     }
 }
