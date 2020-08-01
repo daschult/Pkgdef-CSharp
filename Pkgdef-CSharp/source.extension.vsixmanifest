@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="Pkgdef_CSharp.d934e06f-b963-4acf-a0c2-3bf8294981ac" Version="1.0" Language="en-US" Publisher="Dan Schulte (MSFT)" />
+        <Identity Id="Pkgdef_CSharp.d934e06f-b963-4acf-a0c2-3bf8294981ac" Version="2.0" Language="en-US" Publisher="Dan Schulte (MSFT)" />
         <DisplayName>PKGDEF</DisplayName>
         <Description xml:space="preserve">Language support for Visual Studio PKGDEF files.</Description>
         <Tags>PKGDEF</Tags>
