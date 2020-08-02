@@ -87,7 +87,7 @@ namespace Pkgdef_CSharp
                 public RegistryKeyDataItemNameFormatDefinition()
                 {
                     this.DisplayName = PkgdefClassifier.TypeNames.RegistryKeyDataItemName;
-                    this.ForegroundColor = Colors.Blue;
+                    this.ForegroundColor = Colors.Red;
                 }
             }
 
@@ -100,7 +100,7 @@ namespace Pkgdef_CSharp
                 public RegistryKeyDataItemNumberValueFormatDefinition()
                 {
                     this.DisplayName = PkgdefClassifier.TypeNames.RegistryKeyDataItemNumberValue;
-                    this.ForegroundColor = Colors.Red;
+                    this.ForegroundColor = Colors.Black;
                 }
             }
 
@@ -231,6 +231,11 @@ namespace Pkgdef_CSharp
 
                         case PkgdefSegmentType.RegistryKeyPath:
                             spans.Add(PkgdefClassifier.CreateClassificationSpan(textSnapshot, segment, this.registryKeyRelativePathClassificationType));
+                            break;
+
+                        case PkgdefSegmentType.RegistryKeyDataItem:
+                            PkgdefRegistryKeyDataItemSegment registryKeyDataItemSegment = (PkgdefRegistryKeyDataItemSegment)segment;
+                            spans.Add(PkgdefClassifier.CreateClassificationSpan(textSnapshot, registryKeyDataItemSegment.GetNameSegment(), this.registryKeyDataItemNameClassificationType));
                             break;
                     }
                 }

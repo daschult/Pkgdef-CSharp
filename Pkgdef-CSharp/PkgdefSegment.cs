@@ -92,5 +92,10 @@ namespace Pkgdef_CSharp
         {
             return PkgdefDocument.ParseRegistryKeyPath(startIndex, text);
         }
+
+        public static PkgdefRegistryKeyDataItemSegment RegistryKeyDataItem(int startIndex, string text)
+        {
+            return PkgdefDocument.ParseRegistryKeyDataItem(startIndex, text);
+        }
     }
 }

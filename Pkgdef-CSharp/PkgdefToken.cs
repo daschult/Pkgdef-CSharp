@@ -1,4 +1,8 @@
-﻿namespace Pkgdef_CSharp
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace Pkgdef_CSharp
 {
     /// <summary>
     /// A token within a PKGDEF document.
@@ -182,6 +186,41 @@
             return this.startIndex.GetHashCode() ^
                 this.text.GetHashCode() ^
                 this.tokenType.GetHashCode();
+        }
+
+        public static int GetStartIndex(IEnumerable<PkgdefToken> tokens)
+        {
+            PreCondition.AssertNotNullAndNotEmpty(tokens, nameof(tokens));
+
+            return tokens.First().GetStartIndex();
+        }
+
+        public static int GetLength(IEnumerable<PkgdefToken> tokens)
+        {
+            PreCondition.AssertNotNullAndNotEmpty(tokens, nameof(tokens));
+
+            return PkgdefToken.GetAfterEndIndex(tokens) - PkgdefToken.GetStartIndex(tokens);
+        }
+
+        public static int GetAfterEndIndex(IEnumerable<PkgdefToken> tokens)
+        {
+            PreCondition.AssertNotNullAndNotEmpty(tokens, nameof(tokens));
+
+            return tokens.Last().GetAfterEndIndex();
+        }
+
+        public static int GetEndIndex(IEnumerable<PkgdefToken> tokens)
+        {
+            PreCondition.AssertNotNullAndNotEmpty(tokens, nameof(tokens));
+
+            return PkgdefToken.GetAfterEndIndex(tokens) - 1;
+        }
+
+        public static string GetText(IEnumerable<PkgdefToken> tokens)
+        {
+            PreCondition.AssertNotNullAndNotEmpty(tokens, nameof(tokens));
+
+            return string.Join("", tokens.Select(token => token.GetText()));
         }
     }
 }

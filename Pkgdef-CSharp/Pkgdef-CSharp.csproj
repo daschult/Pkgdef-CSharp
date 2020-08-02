@@ -50,7 +50,10 @@
     <Compile Include="Iterator.cs" />
     <Compile Include="IteratorBase.cs" />
     <Compile Include="ParseException.cs" />
+    <Compile Include="PkgdefRegistryKeyDataItemNameSegment.cs" />
+    <Compile Include="PkgdefRegistryKeyDataItemSegment.cs" />
     <Compile Include="PkgdefRegistryKeyPathSegment.cs" />
+    <Compile Include="PkgdefRegistryKeySegment.cs" />
     <Compile Include="VersionedCache.cs" />
     <Compile Include="PkgdefIssue.cs" />
     <Compile Include="PkgdefClassifier.cs" />

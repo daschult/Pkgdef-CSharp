@@ -57,5 +57,12 @@
                 this.text == rhs.text &&
                 this.segmentType == rhs.segmentType;
         }
+
+        public override int GetHashCode()
+        {
+            return this.startIndex.GetHashCode() ^
+                this.text.GetHashCode() ^
+                this.segmentType.GetHashCode();
+        }
     }
 }

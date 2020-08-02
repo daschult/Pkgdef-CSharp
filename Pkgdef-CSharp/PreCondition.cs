@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Pkgdef_CSharp
 {
@@ -75,6 +76,42 @@ namespace Pkgdef_CSharp
             if (!object.Equals(value, expectedValue))
             {
                 throw new PreConditionException($"{valueName} ({value}) must be equal to {expectedValue}.");
+            }
+        }
+
+        public static void AssertOneOf<T>(T value, IEnumerable<T> possibleValues, string valueName)
+        {
+            PreCondition.AssertNotNullAndNotEmpty(possibleValues, nameof(possibleValues));
+
+            if (!possibleValues.Contains(value))
+            {
+                StringBuilder message = new StringBuilder();
+                message.Append($"{valueName} ({value}) must be ");
+
+                int possibleValueCount = possibleValues.Count();
+                if (possibleValueCount == 1)
+                {
+                    message.Append(Strings.Escape(possibleValues.First().ToString()));
+                }
+                else
+                {
+                    message.Append("either ");
+                    if (possibleValueCount == 2)
+                    {
+                        message.Append($"{Strings.Escape(possibleValues.First().ToString())} ");
+                    }
+                    else
+                    {
+                        foreach (T possibleValue in possibleValues.Take(possibleValueCount - 1))
+                        {
+                            message.Append($"{Strings.Escape(possibleValue.ToString())}, ");
+                        }
+                    }
+                    message.Append($"or {Strings.Escape(possibleValues.Last().ToString())}");
+                }
+                message.Append('.');
+
+                throw new PreConditionException(message.ToString());
             }
         }
 

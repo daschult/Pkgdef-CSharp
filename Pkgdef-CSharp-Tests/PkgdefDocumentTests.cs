@@ -159,18 +159,37 @@ namespace Pkgdef_CSharp_Tests
 
             ParseTest(
                 "[",
-                new[] { PkgdefSegment.RegistryKeyPath(0, "[") },
+                new[]
+                {
+                    PkgdefSegment.RegistryKeyPath(0, "[")
+                },
                 new[] { PkgdefIssue.Error(0, 1, "Missing registry key path right square bracket (\']\').") });
             ParseTest(
                 "[hello",
-                new[] { PkgdefSegment.RegistryKeyPath(0, "[hello") },
+                new[]
+                {
+                    PkgdefSegment.RegistryKeyPath(0, "[hello")
+                },
                 new[] { PkgdefIssue.Error(0, 6, "Missing registry key path right square bracket (\']\').") });
             ParseTest(
                 "[hello]",
-                new[] { PkgdefSegment.RegistryKeyPath(0, "[hello]") });
+                new[]
+                {
+                    PkgdefSegment.RegistryKeyPath(0, "[hello]")
+                });
             ParseTest(
                 "[$RootKey$\\Editors\\{19D8ED1B-FFD3-4DFA-B329-E47AD8752E9E}]",
-                new[] { PkgdefSegment.RegistryKeyPath(0, "[$RootKey$\\Editors\\{19D8ED1B-FFD3-4DFA-B329-E47AD8752E9E}]") });
+                new[]
+                {
+                    PkgdefSegment.RegistryKeyPath(0, "[$RootKey$\\Editors\\{19D8ED1B-FFD3-4DFA-B329-E47AD8752E9E}]")
+                });
+
+            ParseTest(
+                "@=\"RequestEditorFactory\"",
+                new[] { PkgdefSegment.RegistryKeyDataItem(0, "@=\"RequestEditorFactory\"") });
+            ParseTest(
+                "\"DisplayName\"=\"#108\"",
+                new[] { PkgdefSegment.RegistryKeyDataItem(0, "\"DisplayName\"=\"#108\"") });
 
             //ParseTest(
             //    new StringBuilder()

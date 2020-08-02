@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 
 namespace Pkgdef_CSharp
 {
@@ -11,6 +7,18 @@ namespace Pkgdef_CSharp
     /// </summary>
     internal static class Strings
     {
+        public static string EscapeAndQuote(string value)
+        {
+            return Strings.Quote(Strings.Escape(value));
+        }
+
+        public static string Quote(string value)
+        {
+            PreCondition.AssertNotNull(value, nameof(value));
+
+            return $"\"{value}\"";
+        }
+
         /// <summary>
         /// Escape all of the escape sequences within the provided string value.
         /// </summary>

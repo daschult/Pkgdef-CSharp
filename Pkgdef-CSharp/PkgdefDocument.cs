@@ -120,6 +120,11 @@ namespace Pkgdef_CSharp
                     result = PkgdefDocument.ParseRegistryKeyPath(tokenizer, onIssue);
                     break;
 
+                case PkgdefTokenType.AtSign:
+                case PkgdefTokenType.DoubleQuote:
+                    result = PkgdefDocument.ParseRegistryKeyDataItem(tokenizer, onIssue);
+                    break;
+
                 default:
                     result = PkgdefSegment.Unrecognized(tokenizer.GetCurrent().GetStartIndex(), tokenizer.GetCurrent().GetText());
                     tokenizer.Next();
@@ -210,6 +215,131 @@ namespace Pkgdef_CSharp
             }
 
             return result;
+        }
+
+        internal static PkgdefRegistryKeyDataItemSegment ParseRegistryKeyDataItem(int startIndex, string text)
+        {
+            PreCondition.AssertGreaterThanOrEqualTo(startIndex, 0, nameof(startIndex));
+            PreCondition.AssertNotNullAndNotEmpty(text, nameof(text));
+            PreCondition.AssertOneOf(text[0], "@\"", "text[0]");
+
+            Action<PkgdefIssue> onIssue = PkgdefDocument.IgnoreIssue;
+            PkgdefTokenizer tokenizer = PkgdefTokenizer.Create(startIndex, text, onIssue);
+            tokenizer.Next();
+            return PkgdefDocument.ParseRegistryKeyDataItem(tokenizer, onIssue);
+        }
+
+        internal static PkgdefRegistryKeyDataItemSegment ParseRegistryKeyDataItem(PkgdefTokenizer tokenizer, Action<PkgdefIssue> onIssue)
+        {
+            PreCondition.AssertNotNull(tokenizer, nameof(tokenizer));
+            PreCondition.AssertTrue(tokenizer.HasCurrent(), "tokenizer.HasCurrent()");
+            PreCondition.AssertOneOf(tokenizer.GetCurrent().GetTokenType(), new[] { PkgdefTokenType.AtSign, PkgdefTokenType.DoubleQuote }, "tokenizer.GetCurrent().GetTokenType()");
+            PreCondition.AssertNotNull(onIssue, nameof(onIssue));
+
+            PkgdefToken registryKeyDataItemNameFirstToken = tokenizer.TakeCurrent();
+            List<PkgdefToken> tokens = new List<PkgdefToken>() { registryKeyDataItemNameFirstToken };
+            bool dataItemDone = false;
+
+            if (registryKeyDataItemNameFirstToken.GetTokenType() == PkgdefTokenType.DoubleQuote)
+            {
+                if (!tokenizer.HasCurrent())
+                {
+                    onIssue(new PkgdefIssue(registryKeyDataItemNameFirstToken.GetStartIndex(), registryKeyDataItemNameFirstToken.GetLength(), "Missing registry key data item name closing double-quote ('\"')."));
+                    dataItemDone = true;
+                }
+                else
+                {
+                    while (tokenizer.HasCurrent())
+                    {
+                        PkgdefTokenType tokenType = tokenizer.GetCurrent().GetTokenType();
+                        if (tokenType == PkgdefTokenType.NewLine)
+                        {
+                            onIssue(new PkgdefIssue(PkgdefToken.GetStartIndex(tokens), PkgdefToken.GetLength(tokens), "Missing registry key data item name closing double-quote ('\"')."));
+                            dataItemDone = true;
+                            break;
+                        }
+                        else
+                        {
+                            PkgdefToken token = tokenizer.TakeCurrent();
+                            tokens.Add(token);
+                            if (token.GetTokenType() == PkgdefTokenType.DoubleQuote)
+                            {
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!dataItemDone)
+            {
+                if (!tokenizer.HasCurrent())
+                {
+                    onIssue(new PkgdefIssue(PkgdefToken.GetStartIndex(tokens), PkgdefToken.GetLength(tokens), "Missing registry key data item equals sign ('=')."));
+                    dataItemDone = true;
+                }
+                else
+                {
+                    while (tokenizer.HasCurrent())
+                    {
+                        PkgdefTokenType tokenType = tokenizer.GetCurrent().GetTokenType();
+                        if (tokenType == PkgdefTokenType.NewLine)
+                        {
+                            onIssue(new PkgdefIssue(PkgdefToken.GetStartIndex(tokens), PkgdefToken.GetLength(tokens), "Missing registry key data item equals sign ('=')."));
+                            dataItemDone = true;
+                            break;
+                        }
+                        else
+                        {
+                            PkgdefToken token = tokenizer.TakeCurrent();
+                            tokens.Add(token);
+                            if (token.GetTokenType() == PkgdefTokenType.EqualsSign)
+                            {
+                                break;
+                            }
+                            else if (token.GetTokenType() != PkgdefTokenType.Whitespace)
+                            {
+                                onIssue(new PkgdefIssue(token.GetStartIndex(), token.GetLength(), "Expected registry key data item equals sign ('=')."));
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!dataItemDone)
+            {
+                if (!tokenizer.HasCurrent())
+                {
+                    onIssue(new PkgdefIssue(PkgdefToken.GetStartIndex(tokens), PkgdefToken.GetLength(tokens), "Missing registry key data item value."));
+                }
+                else
+                {
+                    int dataItemValueTokenCount = 0;
+                    while (tokenizer.HasCurrent())
+                    {
+                        PkgdefTokenType tokenType = tokenizer.GetCurrent().GetTokenType();
+                        if (tokenType == PkgdefTokenType.NewLine)
+                        {
+                            if (dataItemValueTokenCount == 0)
+                            {
+                                onIssue(new PkgdefIssue(PkgdefToken.GetStartIndex(tokens), PkgdefToken.GetLength(tokens), "Missing registry key data item value."));
+                            }
+                            break;
+                        }
+                        else
+                        {
+                            PkgdefToken token = tokenizer.TakeCurrent();
+                            tokens.Add(token);
+                            if (token.GetTokenType() != PkgdefTokenType.Whitespace)
+                            {
+                                dataItemValueTokenCount++;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return new PkgdefRegistryKeyDataItemSegment(tokens);
         }
     }
 }

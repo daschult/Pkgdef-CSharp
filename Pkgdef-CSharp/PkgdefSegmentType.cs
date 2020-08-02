@@ -46,6 +46,16 @@
         RegistryKeyPath,
 
         /// <summary>
+        /// A data item within a registry key.
+        /// </summary>
+        RegistryKeyDataItem,
+
+        /// <summary>
+        /// The name of a registry key data item.
+        /// </summary>
+        RegistryKeyDataItemName,
+
+        /// <summary>
         /// An unrecognized segment.
         /// </summary>
         Unrecognized,
