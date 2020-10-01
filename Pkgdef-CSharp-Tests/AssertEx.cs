@@ -8,7 +8,7 @@ using Pkgdef_CSharp;
 namespace Pkgdef_CSharp_Tests
 {
     /// <summary>
-    /// A collection of assertion methods. Test change. 3
+    /// A collection of assertion methods. Test change. 4
     /// </summary>
     internal static class AssertEx
     {
